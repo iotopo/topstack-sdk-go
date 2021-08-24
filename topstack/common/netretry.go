@@ -5,7 +5,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"reflect"
 	"time"
 
 	"github.com/iotopo/topstack-sdk-go/topstack/common/errors"
@@ -71,13 +70,15 @@ func safeDurationFunc(durationFunc profile.DurationFunc) profile.DurationFunc {
 // request with `ClientToken` means it's idempotent and retryable,
 // unretryable request SHOULDN'T retry for temporary network failure
 func isRetryable(obj interface{}) bool {
-	// obj Must be struct ptr
-	getType := reflect.TypeOf(obj)
-	if getType.Kind() != reflect.Ptr || getType.Elem().Kind() != reflect.Struct {
-		return false
-	}
+	//// obj Must be struct ptr
+	//getType := reflect.TypeOf(obj)
+	//if getType.Kind() != reflect.Ptr || getType.Elem().Kind() != reflect.Struct {
+	//	return false
+	//}
+	//
+	//// obj Must exist named field
+	//_, ok := getType.Elem().FieldByName(fieldClientToken)
+	//return ok
 
-	// obj Must exist named field
-	_, ok := getType.Elem().FieldByName(fieldClientToken)
-	return ok
+	return false
 }

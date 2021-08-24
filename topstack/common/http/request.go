@@ -1,6 +1,7 @@
 package common
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
 
@@ -154,15 +155,11 @@ func GetUrlQueriesEncoded(params map[string]string) string {
 
 func (r *BaseRequest) GetBodyReader() io.Reader {
 	if r.httpMethod == POST {
-		//s := GetUrlQueriesEncoded(r.params)
 		b, _ := json.Marshal(r.params)
-		//if err != nil {
-		//	return err
-		//}
-		//requestPayload = string(b)
-		return strings.NewReader(string(b))
+		return bytes.NewReader(b)
 	} else {
-		return strings.NewReader("")
+		//return strings.NewReader("")
+		return nil
 	}
 }
 

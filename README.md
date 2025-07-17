@@ -31,12 +31,87 @@ func main() {
 }
 ```
 
-### 物联网设备管理
+### 物联网数据操作
 ```go
 import "topstack-sdk-go/iot"
 
+// 查询单测点实时值
+resp, err := iot.FindLast(iot.FindLastRequest{DeviceID: "dev1", PointID: "v1"})
+if err != nil {
+    // 错误处理
+}
+
+// 批量查询多测点实时值
+resp, err := iot.FindLastBatch(iot.FindLastBatchRequest{{DeviceID: "dev1", PointID: "v1"}})
+if err != nil {
+    // 错误处理
+}
+
+// 控制指令下发
+resp, err := iot.SetValue(iot.SetValueRequest{DeviceID: "dev1", PointID: "V4", Value: "2"})
+if err != nil {
+    // 错误处理
+}
+
+// 查询历史数据
+resp, err := iot.QueryHistory(iot.HistoryRequest{
+    Points:      []iot.FindLastRequest{{DeviceID: "dev1", PointID: "v1"}},
+    Start:       time.Now().Add(-10 * time.Minute),
+    End:         time.Now(),
+    Interval:    "10s",
+    Aggregation: "last",
+})
+if err != nil {
+    // 错误处理
+}
+```
+
+### 物联网设备管理
+```go
+import "topstack-sdk-go/iot/device"
+
 // 查询设备列表
-devices, err := iot.QueryDeviceList(iot.DeviceListRequest{PageNum: 1, PageSize: 10})
+resp, err := device.Query(device.QueryRequest{Search: "dev1", PageNum: 1, PageSize: 10})
+if err != nil {
+    // 错误处理
+}
+
+// 查询设备属性
+resp, err := device.QueryProps("dev1")
+if err != nil {
+    // 错误处理
+}
+
+// 查询设备测点
+resp, err := device.QueryPoint(device.PointQueryRequest{DeviceID: "dev1"})
+if err != nil {
+    // 错误处理
+}
+```
+
+### 物联网设备类型管理
+```go
+import "topstack-sdk-go/iot/devicetype"
+
+// 查询设备类型列表
+resp, err := devicetype.Query(devicetype.QueryRequest{Search: "type1"})
+if err != nil {
+    // 错误处理
+}
+
+// 查询设备类型测点
+resp, err := devicetype.QueryPoint(devicetype.PointQueryRequest{DeviceTypeID: "type1"})
+if err != nil {
+    // 错误处理
+}
+```
+
+### 物联网网关管理
+```go
+import "topstack-sdk-go/iot/gateway"
+
+// 查询网关列表
+resp, err := gateway.Query(gateway.QueryRequest{Search: "gateway1", PageNum: 1, PageSize: 10})
 if err != nil {
     // 错误处理
 }
@@ -44,10 +119,10 @@ if err != nil {
 
 ### 告警管理
 ```go
-import "topstack-sdk-go/alert"
+import "topstack-sdk-go/alert/alertlevel"
 
 // 查询告警等级
-levels, err := alert.QueryAlertLevel()
+resp, err := alertlevel.Query()
 if err != nil {
     // 错误处理
 }
@@ -55,10 +130,10 @@ if err != nil {
 
 ### 能源管理
 ```go
-import "topstack-sdk-go/ems"
+import "topstack-sdk-go/ems/meter"
 
 // 查询仪表列表
-meters, err := ems.QueryMeterList(ems.MeterListRequest{PageNum: 1, PageSize: 10})
+resp, err := meter.Query(meter.QueryRequest{PageNum: 1, PageSize: 10})
 if err != nil {
     // 错误处理
 }
@@ -66,10 +141,10 @@ if err != nil {
 
 ### 工单管理
 ```go
-import "topstack-sdk-go/asset"
+import "topstack-sdk-go/asset/workorder/alert"
 
 // 查询告警工单
-orders, err := asset.QueryAlertWorkOrderList(asset.AlertWorkOrderListRequest{PageNum: 1, PageSize: 10})
+resp, err := alert.Query(alert.QueryRequest{PageNum: 1, PageSize: 10})
 if err != nil {
     // 错误处理
 }
@@ -87,27 +162,33 @@ if err != nil {
 ```
 
 ## 目录结构与模块说明
-- `iot/`    物联网设备、测点、网关等接口
-- `alert/`  告警等级、类型、记录等接口
+- `iot/`    物联网数据操作接口
+  - `iot/device/`    设备管理接口
+  - `iot/devicetype/` 设备类型管理接口
+  - `iot/gateway/`   网关管理接口
+- `alert/`  告警管理接口
+  - `alert/alertlevel/` 告警等级管理
+  - `alert/alerttype/`  告警类型管理
+  - `alert/alertrecord/` 告警记录管理
 - `ems/`    能源管理相关接口
+  - `ems/meter/`     仪表管理
+  - `ems/sector/`    用能单元管理
+  - `ems/subentry/`  分项管理
 - `asset/`  工单相关接口
+  - `asset/workorder/alert/`      告警工单
+  - `asset/workorder/locale/`     现场工单
+  - `asset/workorder/maintenance/` 维护工单
+  - `asset/workorder/schedule/`   计划工单
 - `client/` HTTP 客户端封装、全局变量接口
-- `sample/` 示例代码
 
 ## 错误处理
 所有接口均返回标准 Go error：
 ```go
-resp, err := iot.QueryDeviceList(req)
+resp, err := iot.FindLast(req)
 if err != nil {
     // 处理错误
 }
 ```
-
-## 配置说明
-可通过代码或环境变量配置：
-- `TOPSTACK_BASE_URL`
-- `TOPSTACK_API_KEY`
-- `TOPSTACK_SECRET`
 
 ## 示例项目
 查看 `sample/` 目录下的完整示例：

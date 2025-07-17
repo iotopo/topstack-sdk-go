@@ -1,21 +1,13 @@
 package iot
 
 import (
-	"net/http"
 	"time"
 )
 
+// Data related models
 type FindLastRequest struct {
 	DeviceID string `json:"deviceID"`
 	PointID  string `json:"pointID"`
-}
-
-func (FindLastRequest) Method() string {
-	return http.MethodPost
-}
-
-func (FindLastRequest) Url() string {
-	return "/iot/open_api/v1/data/findLast"
 }
 
 type FindLastResponse struct {
@@ -28,14 +20,6 @@ type FindLastResponse struct {
 
 type FindLastBatchRequest []FindLastRequest
 
-func (FindLastBatchRequest) Method() string {
-	return http.MethodPost
-}
-
-func (FindLastBatchRequest) Url() string {
-	return "/iot/open_api/v1/data/findLastBatch"
-}
-
 type FindLastBatchResponse []FindLastResponse
 
 type SetValueRequest struct {
@@ -44,15 +28,7 @@ type SetValueRequest struct {
 	Value    string `json:"value"`
 }
 
-func (SetValueRequest) Method() string {
-	return http.MethodPost
-}
-
-func (SetValueRequest) Url() string {
-	return "/iot/open_api/v1/data/setValue"
-}
-
-type QueryDataRequest struct {
+type HistoryRequest struct {
 	Points      []FindLastRequest `json:"points"`
 	Start       time.Time         `json:"start" format:"date-time"`
 	End         time.Time         `json:"end" format:"date-time"`
@@ -64,15 +40,7 @@ type QueryDataRequest struct {
 	Order       string            `json:"order" enums:"asc,desc"` // asc(默认升序),desc
 }
 
-func (QueryDataRequest) Method() string {
-	return http.MethodPost
-}
-
-func (QueryDataRequest) Url() string {
-	return "/iot/open_api/v1/data/query"
-}
-
-type QueryDataResponse struct {
+type HistoryResponse struct {
 	Results []struct {
 		DeviceID string `json:"deviceID"`
 		PointID  string `json:"pointID"`

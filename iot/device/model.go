@@ -1,12 +1,11 @@
-package iot
+package device
 
 import (
-	"fmt"
-	"net/http"
 	"time"
 )
 
-type DeviceQueryRequest struct {
+// Device related models
+type QueryRequest struct {
 	Search          string `json:"search,omitempty"`          // 名称或标识关键字
 	GatewayID       string `json:"gatewayID,omitempty"`       // 所属网关
 	TypeID          string `json:"typeID,omitempty"`          // 所属模型
@@ -23,15 +22,7 @@ type DeviceQueryRequest struct {
 	PageSize int    `json:"pageSize,omitempty"` // 每页数量，默认为 10
 }
 
-func (DeviceQueryRequest) Method() string {
-	return http.MethodGet
-}
-
-func (DeviceQueryRequest) Url() string {
-	return "/iot/open_api/v1/device/query"
-}
-
-type DeviceQueryResponse struct {
+type QueryResponse struct {
 	Total int64 `json:"total"`
 	Items []struct {
 		ID          string `json:"id"`
@@ -75,22 +66,39 @@ type DeviceQueryResponse struct {
 	} `json:"items"`
 }
 
-type DevicePropsQueryRequest struct {
-	DeviceID string `json:"-"`
-}
-
-func (DevicePropsQueryRequest) Method() string {
-	return http.MethodGet
-}
-
-func (req DevicePropsQueryRequest) Url() string {
-	return fmt.Sprintf("/iot/open_api/v1/device/%s/props", req.DeviceID)
-}
-
-type DevicePropsQueryResponse []struct {
+type PropsQueryResponse []struct {
 	PropertyID   string `json:"id"`
 	PropertyType string `json:"type"`
 	Name         string `json:"name"`
 	Description  string `json:"description,omitempty"`
 	Value        string `json:"value,omitempty"`
+}
+
+// Device Point related models
+type PointQueryRequest struct {
+	Search   string `json:"search,omitempty"`
+	DeviceID string `json:"deviceID,omitempty"`
+	Type     string `json:"type,omitempty"`
+	Order    string `json:"order,omitempty"`
+	PageNum  int    `json:"pageNum,omitempty"`
+	PageSize int    `json:"pageSize,omitempty"`
+}
+
+type PointQueryResponse struct {
+	Total int64 `json:"total"`
+	Items []struct {
+		PointID    string `json:"pointID"`
+		Name       string `json:"name"`
+		Type       string `json:"type"`       // 类型 int double string bool array float time
+		AccessMode string `json:"accessMode"` // 读写类型，只读(r)、只写(w)、读写(rw)
+
+		OrderNumber int    `json:"orderNumber"`
+		Description string `json:"description,omitempty"`
+		Group       string `json:"group,omitempty"`
+		Unit        string `json:"unit,omitempty"`      // 计量单位
+		Format      string `json:"format,omitempty"`    // 格式化 0.00 http://numeraljs.com/#format
+		Edge        bool   `json:"edge,omitempty"`      // 是否只在边缘侧使用
+		IsArray     bool   `json:"isArray,omitempty"`   // 是否为数组
+		Generator   string `json:"generator,omitempty"` // 模拟器函数, 当通道启用仿真模式时生效
+	} `json:"items"`
 }

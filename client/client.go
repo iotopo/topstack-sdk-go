@@ -60,18 +60,43 @@ func DELETE[T any](url string, reqData any, respData *Response[T]) error {
 	return SendRequest(http.MethodDelete, url, reqData, respData)
 }
 
-func Init(baseUrl, apiKey, projectID string) *resty.Client {
+// Option 用于配置 resty.Client
+// 例如: Debug、Logger 等
+type Option func(*resty.Client)
+
+// WithDebug 开启或关闭 Debug 模式
+func WithDebug(debug bool) Option {
+	return func(c *resty.Client) {
+		c.SetDebug(debug)
+	}
+}
+
+// WithLogger 设置自定义 Logger
+func WithLogger(logger resty.Logger) Option {
+	return func(c *resty.Client) {
+		c.SetLogger(logger)
+	}
+}
+
+// WithTimeout 设置超时时间
+func WithTimeout(timeout time.Duration) Option {
+	return func(c *resty.Client) {
+		c.SetTimeout(timeout)
+	}
+}
+
+func Init(baseUrl, apiKey, projectID string, opts ...Option) *resty.Client {
 	cli = resty.New()
 	cli.SetTimeout(20 * time.Second)
 	cli.SetBaseURL(baseUrl)
-	cli.SetHeaders(map[string]string{
-		"Content-Type": "application/json",
-		"X-API-Key":    apiKey,
-		"x-ProjectID":  projectID,
-	})
+	cli.SetHeader("X-API-Key", apiKey)
+	cli.SetHeader("X-ProjectID", projectID)
 	cli.SetTransport(&http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	})
-	//httptrace.ClientTrace
+	// 应用 Option
+	for _, opt := range opts {
+		opt(cli)
+	}
 	return cli
 }

@@ -212,7 +212,7 @@ go run main.go
 欢迎提交 Issue 和 Pull Request 改进 SDK。
 
 ## 许可证
-[请补充您的许可证信息]
+MIT License 
 
 ## 支持
 - 邮箱: service@iotopo.com

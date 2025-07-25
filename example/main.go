@@ -13,8 +13,8 @@ import (
 func main() {
 	apiKey := "8mphozy98fkor6iu"
 	projectID := "iotopo"
-	cli := client.Init("http://localhost:8000", apiKey, projectID)
-	cli.SetDebug(true)
+
+	client.Init("http://localhost:8000", apiKey, projectID, client.WithDebug(true))
 
 	{
 		resp, err := alertlevel.Query()

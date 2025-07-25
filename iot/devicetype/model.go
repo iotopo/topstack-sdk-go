@@ -39,21 +39,87 @@ type PointQueryRequest struct {
 	PageSize     int    `json:"pageSize,omitempty"`
 }
 
-type PointQueryResponse struct {
-	Total int64 `json:"total"`
-	Items []struct {
-		PointID    string `json:"pointID"`
-		Name       string `json:"name"`
-		Type       string `json:"type"`       // 类型 int double string bool array float time
-		AccessMode string `json:"accessMode"` // 读写类型，只读(r)、只写(w)、读写(rw)
+type PointItem struct {
+	PointID    string `json:"pointID"`
+	Name       string `json:"name"`
+	Type       string `json:"type"`       // 类型 int double string bool array float time
+	AccessMode string `json:"accessMode"` // 读写类型，只读(r)、只写(w)、读写(rw)
 
-		OrderNumber int    `json:"orderNumber"`
-		Description string `json:"description,omitempty"`
-		Group       string `json:"group,omitempty"`
-		Unit        string `json:"unit,omitempty"`      // 计量单位
-		Format      string `json:"format,omitempty"`    // 格式化 0.00 http://numeraljs.com/#format
-		Edge        bool   `json:"edge,omitempty"`      // 是否只在边缘侧使用
-		IsArray     bool   `json:"isArray,omitempty"`   // 是否为数组
-		Generator   string `json:"generator,omitempty"` // 模拟器函数, 当通道启用仿真模式时生效
-	} `json:"items"`
-} 
+	OrderNumber int    `json:"orderNumber"`
+	Description string `json:"description,omitempty"`
+	Group       string `json:"group,omitempty"`
+	Unit        string `json:"unit,omitempty"`      // 计量单位
+	Format      string `json:"format,omitempty"`    // 格式化 0.00 http://numeraljs.com/#format
+	Edge        bool   `json:"edge,omitempty"`      // 是否只在边缘侧使用
+	IsArray     bool   `json:"isArray,omitempty"`   // 是否为数组
+	Generator   string `json:"generator,omitempty"` // 模拟器函数, 当通道启用仿真模式时生效
+}
+
+type PointQueryResponse struct {
+	Total int64       `json:"total"`
+	Items []PointItem `json:"items"`
+}
+
+type CreateRequest struct {
+	ID          string `json:"id,omitempty"`
+	Name        string `json:"name" binding:"required"`
+	Description string `json:"description,omitempty"`
+	Asset       bool   `json:"asset,omitempty"`
+	Perf        bool   `json:"perf,omitempty"`
+	Code        string `json:"code,omitempty"`
+	Icon        string `json:"icon,omitempty"`
+	GroupID     string `json:"groupID,omitempty"`
+}
+
+type CreateResponse struct {
+	ID string `json:"id"`
+}
+
+type ModifyRequest struct {
+	ID               string  `json:"id" binding:"required"`
+	Name             string  `json:"name,omitempty"`
+	Description      string  `json:"description,omitempty"`
+	Asset            bool    `json:"asset,omitempty"`
+	Perf             bool    `json:"perf,omitempty"`
+	Code             *string `json:"code,omitempty"`
+	Icon             string  `json:"icon,omitempty"`
+	GroupID          *string `json:"groupID,omitempty"`
+	LongitudePointID *string `json:"longitudePointID,omitempty"`
+	LatitudePointID  *string `json:"latitudePointID,omitempty"`
+}
+
+type DeleteRequest struct {
+	ID string `json:"id" binding:"required"`
+}
+
+type DeviceTypePoint struct {
+	DeviceTypeID string `json:"deviceTypeID"`
+	PointID      string `json:"pointID"`
+	Name         string `json:"name"`
+	Type         string `json:"type"`
+	AccessMode   string `json:"accessMode"`
+	OrderNumber  int    `json:"orderNumber,omitempty"`
+	Description  string `json:"description,omitempty"`
+	Group        string `json:"group,omitempty"`
+	Unit         string `json:"unit,omitempty"`
+	Format       string `json:"format,omitempty"`
+	IsArray      bool   `json:"isArray,omitempty"`
+}
+
+type CreatePointRequest DeviceTypePoint
+
+type UpdatePointRequest DeviceTypePoint
+
+type DeletePointRequest struct {
+	DeviceTypeID string `json:"deviceTypeID"`
+	PointID      string `json:"pointID"`
+}
+
+type DeleteAllPointsRequest struct {
+	DeviceTypeID string `json:"deviceTypeID"`
+}
+
+// 批量创建设备类型请求
+// 直接复用 CreateRequest 结构体数组
+
+type BatchCreateRequest []CreateRequest

@@ -8,6 +8,8 @@ import (
 	"topstack-sdk-go/datav"
 	"topstack-sdk-go/iot"
 	"topstack-sdk-go/iot/device"
+	"topstack-sdk-go/iot/device_type_group"
+	"topstack-sdk-go/iot/devicetype"
 )
 
 func main() {
@@ -82,5 +84,179 @@ func main() {
 			panic(err)
 		}
 		fmt.Println(pageUrl)
+	}
+
+	// device_type_group 示例
+	{
+		resp, err := device_type_group.Query(device_type_group.QueryRequest{PageNum: 1, PageSize: 10})
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("device_type_group.Query:", resp)
+	}
+
+	{
+		resp, err := device_type_group.Create(device_type_group.CreateRequest{
+			Name: "测试分组",
+			Code: "test-group",
+			Description: "SDK创建测试",
+		})
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("device_type_group.Create:", resp)
+	}
+
+	{
+		resp, err := device_type_group.Modify(device_type_group.ModifyRequest{
+			ID:   "group-id",
+			Name: "新分组名",
+			Code: "new-code",
+			Description: "修改描述",
+		})
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("device_type_group.Modify:", resp)
+	}
+
+	{
+		resp, err := device_type_group.Delete(device_type_group.DeleteRequest{ID: "group-id"})
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("device_type_group.Delete:", resp)
+	}
+
+	// device_type 示例
+	{
+		resp, err := devicetype.Create(devicetype.CreateRequest{
+			Name: "测试类型",
+			Description: "SDK创建测试类型",
+			Asset: true,
+			Perf: false,
+			Code: "test-type",
+			Icon: "icon-test",
+		})
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("devicetype.Create:", resp)
+	}
+
+	{
+		resp, err := devicetype.Modify(devicetype.ModifyRequest{
+			ID:   "type-id",
+			Name: "新类型名",
+			Description: "修改描述",
+			Asset: false,
+			Perf: true,
+			Code: nil,
+			Icon: "icon-new",
+		})
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("devicetype.Modify:", resp)
+	}
+
+	{
+		resp, err := devicetype.Delete("type-id")
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("devicetype.Delete:", resp)
+	}
+
+	// device_type_point 示例
+	{
+		resp, err := devicetype.CreatePoint(devicetype.CreatePointRequest{
+			DeviceTypeID: "type-id",
+			PointID:      "point-1",
+			Name:         "温度",
+			Type:         "float",
+			AccessMode:   "r",
+			OrderNumber:  1,
+			Description:  "温度点位",
+			Group:        "环境",
+			Unit:         "℃",
+			Format:       "0.0",
+			IsArray:      false,
+		})
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("devicetype.CreatePoint:", resp)
+	}
+
+	{
+		resp, err := devicetype.UpdatePoint(devicetype.UpdatePointRequest{
+			DeviceTypeID: "type-id",
+			PointID:      "point-1",
+			Name:         "温度(修改)",
+			Type:         "float",
+			AccessMode:   "rw",
+			OrderNumber:  2,
+			Description:  "温度点位-修改",
+			Group:        "环境",
+			Unit:         "℃",
+			Format:       "0.0",
+			IsArray:      false,
+		})
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("devicetype.UpdatePoint:", resp)
+	}
+
+	{
+		resp, err := devicetype.DeletePoint("type-id", "point-1")
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("devicetype.DeletePoint:", resp)
+	}
+
+	{
+		resp, err := devicetype.DeleteAllPoints("type-id")
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("devicetype.DeleteAllPoints:", resp)
+	}
+
+	// device 示例
+	{
+		resp, err := device.Create(device.CreateRequest{
+			Name: "测试设备",
+			TypeID: "type-id",
+			Description: "SDK创建测试设备",
+			ConnectMode: "direct",
+		})
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("device.Create:", resp)
+	}
+
+	{
+		resp, err := device.Modify(device.ModifyRequest{
+			ID:   "device-id",
+			Name: "新设备名",
+			Description: "修改描述",
+			ConnectMode: "gateway",
+		})
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("device.Modify:", resp)
+	}
+
+	{
+		resp, err := device.Delete("device-id")
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("device.Delete:", resp)
 	}
 }

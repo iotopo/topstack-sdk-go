@@ -18,6 +18,7 @@ TopStack 目前已完成了信创生态的全面适配：
 - **告警管理 (alert/)**：告警等级、类型、记录等
 - **能源管理 (ems/)**：仪表、能源类型、用能单元、分项、能耗报表等
 - **工单管理 (asset/)**：告警工单、现场工单、维护工单、计划工单等
+- **实时数据订阅 (nats/)**：设备测点数据、设备状态、网关状态、数据通道状态、告警信息等
 - **全局变量 (client/)**：全局变量的读取与更新
 
 ## 安装
@@ -172,6 +173,149 @@ if err != nil {
 }
 ```
 
+### NATS 实时数据订阅
+
+TopStack SDK 支持通过 NATS 消息总线订阅实时数据，包括设备测点数据、设备状态、网关状态、数据通道状态和告警信息。
+
+#### 初始化 NATS 连接
+```go
+import "topstack-sdk-go/nats"
+
+// 配置 NATS 连接参数
+config := nats.NatsConfig{
+    Addr:     "nats://your-nats-server:4222",
+    Token:    "your-nats-token",        // 可选
+    Username: "your-username",          // 可选
+    Password: "your-password",          // 可选
+}
+
+// 创建 NATS 总线
+bus, err := nats.NewNatsBus(config)
+if err != nil {
+    // 错误处理
+}
+defer bus.Close()
+```
+
+#### 订阅设备测点数据
+```go
+// 订阅单个设备的测点数据
+subscriber, err := bus.SubscribePointData("project1", "device1", "point1", func(data *nats.PointData) {
+    fmt.Printf("收到测点数据: 设备=%s, 测点=%s, 值=%v, 质量=%d, 时间=%v\n",
+        data.DeviceID, data.PointID, data.Value, data.Quality, data.Timestamp)
+})
+if err != nil {
+    // 错误处理
+}
+defer subscriber.Unsubscribe()
+
+// 订阅同设备模型下的所有设备测点数据
+subscriber, err := bus.SubscribeDeviceTypeData("project1", "deviceType1", "point1", func(data *nats.PointData) {
+    fmt.Printf("收到设备模型测点数据: 设备=%s, 测点=%s, 值=%v\n",
+        data.DeviceID, data.PointID, data.Value)
+})
+if err != nil {
+    // 错误处理
+}
+defer subscriber.Unsubscribe()
+```
+
+#### 订阅设备状态
+```go
+// 订阅设备在线/离线状态
+subscriber, err := bus.SubscribeDeviceState("project1", "device1", func(data *nats.DeviceState) {
+    status := "离线"
+    if data.State == 1 {
+        status = "在线"
+    }
+    fmt.Printf("设备状态变化: 设备=%s, 状态=%s, 时间=%v\n",
+        data.DeviceID, status, data.Timestamp)
+})
+if err != nil {
+    // 错误处理
+}
+defer subscriber.Unsubscribe()
+```
+
+#### 订阅网关状态
+```go
+// 订阅所有网关状态（使用通配符）
+subscriber, err := bus.SubscribeGatewayState("project1", func(topic string, data *nats.GatewayState) {
+    status := "离线"
+    if data.State == 1 {
+        status = "在线"
+    }
+    fmt.Printf("网关状态变化: 网关=%s, 状态=%s, 时间=%v\n",
+        data.Name, status, data.Timestamp)
+})
+if err != nil {
+    // 错误处理
+}
+defer subscriber.Unsubscribe()
+```
+
+#### 订阅数据通道状态
+```go
+// 订阅所有数据通道状态
+subscriber, err := bus.SubscribeChannelState("project1", func(topic string, data *nats.ChannelState) {
+    fmt.Printf("数据通道状态: 通道=%s, 运行=%v, 连接=%v, 时间=%v\n",
+        data.ChannelName, data.Running, data.Connected, data.Timestamp)
+})
+if err != nil {
+    // 错误处理
+}
+defer subscriber.Unsubscribe()
+```
+
+#### 订阅告警信息
+```go
+// 订阅项目下的所有告警信息
+subscriber, err := bus.SubscribeAlertInfo("project1", func(topic string, data *nats.AlertInfo) {
+    fmt.Printf("收到告警: 标题=%s, 等级=%s, 设备=%s, 时间=%v\n",
+        data.Title, data.AlertLevelName, data.DeviceName, data.CreatedAt)
+})
+if err != nil {
+    // 错误处理
+}
+defer subscriber.Unsubscribe()
+```
+
+#### 数据模型说明
+
+**PointData（测点数据）**
+- `DeviceID`: 设备ID
+- `PointID`: 测点ID
+- `Value`: 测点值
+- `Quality`: 数据质量（1=离线，2=无效）
+- `Timestamp`: 时间戳
+- `Status`: 状态（0=正常，>0=越上限，<0=越下限）
+
+**DeviceState（设备状态）**
+- `DeviceID`: 设备ID
+- `State`: 状态（0=离线，1=在线）
+- `Timestamp`: 时间戳
+
+**GatewayState（网关状态）**
+- `Name`: 网关名称
+- `GatewayID`: 网关ID
+- `State`: 状态（0=离线，1=在线）
+- `Timestamp`: 时间戳
+
+**ChannelState（数据通道状态）**
+- `ChannelID`: 通道ID
+- `ChannelName`: 通道名称
+- `Running`: 是否运行中
+- `Connected`: 是否已连接
+- `Timestamp`: 时间戳
+
+**AlertInfo（告警信息）**
+- `Title`: 告警标题
+- `Content`: 告警内容
+- `AlertLevelName`: 告警等级名称
+- `DeviceName`: 设备名称
+- `CreatedAt`: 创建时间
+- `Status`: 告警状态（unhandled/handled/ignored/auto）
+
 ## 目录结构与模块说明
 - `iot/`    物联网数据操作接口
   - `iot/device/`    设备管理接口
@@ -190,6 +334,10 @@ if err != nil {
   - `asset/workorder/locale/`     现场工单
   - `asset/workorder/maintenance/` 维护工单
   - `asset/workorder/schedule/`   计划工单
+- `nats/`   NATS 实时数据订阅接口
+  - `nats/nats.go`    NATS 总线实现
+  - `nats/model.go`   数据模型定义
+  - `nats/topics.go`  主题格式定义
 - `client/` HTTP 客户端封装、全局变量接口
 
 ## 错误处理

@@ -100,3 +100,25 @@ func Init(baseUrl, apiKey, projectID string, opts ...Option) *resty.Client {
 	}
 	return cli
 }
+
+// InitClient API 密钥认证
+// baseUrl 基础 URL
+// appKey 应用ID
+// appSecret 应用密钥
+func InitClient(baseUrl, appKey, appSecret string, opts ...Option) *resty.Client {
+	cli = resty.New()
+	cli.SetTimeout(20 * time.Second)
+	cli.SetBaseURL(baseUrl)
+	cli.SetTransport(&HMACRoundTripper{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+		AppKey:    appKey,
+		AppSecret: appSecret,
+	})
+	// 应用 Option
+	for _, opt := range opts {
+		opt(cli)
+	}
+	return cli
+}

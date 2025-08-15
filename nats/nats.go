@@ -70,7 +70,7 @@ func (bus *NatsBus) SubscribeDeviceState(projectID, deviceID string, fn func(dat
 }
 
 // SubscribeGatewayState 订阅网关状态数据
-func (bus *NatsBus) SubscribeGatewayState(projectID string, fn func(topic string, data *GatewayState)) (subscriber Subscriber, err error) {
+func (bus *NatsBus) SubscribeGatewayState(projectID string, fn func(ata *GatewayState)) (subscriber Subscriber, err error) {
 	return bus.conn.Subscribe(gatewayStateTopic(projectID, "*"), func(msg *nats.Msg) {
 		var data GatewayState
 		err := json.Unmarshal(msg.Data, &data)
@@ -78,12 +78,12 @@ func (bus *NatsBus) SubscribeGatewayState(projectID string, fn func(topic string
 			slog.Error("unmarshal gateway state data error", "err", err)
 			return
 		}
-		fn(msg.Subject, &data)
+		fn(&data)
 	})
 }
 
 // SubscribeChannelState 订阅数据通道状态数据
-func (bus *NatsBus) SubscribeChannelState(projectID string, fn func(topic string, data *ChannelState)) (subscriber Subscriber, err error) {
+func (bus *NatsBus) SubscribeChannelState(projectID string, fn func(data *ChannelState)) (subscriber Subscriber, err error) {
 	return bus.conn.Subscribe(channelStateTopic(projectID, "*"), func(msg *nats.Msg) {
 		var data ChannelState
 		err := json.Unmarshal(msg.Data, &data)
@@ -91,12 +91,12 @@ func (bus *NatsBus) SubscribeChannelState(projectID string, fn func(topic string
 			slog.Error("unmarshal channel state data error", "err", err)
 			return
 		}
-		fn(msg.Subject, &data)
+		fn(&data)
 	})
 }
 
 // SubscribeAlertInfo 订阅全部告警消息
-func (bus *NatsBus) SubscribeAlertInfo(projectID string, fn func(topic string, data *AlertInfo)) (subscriber Subscriber, err error) {
+func (bus *NatsBus) SubscribeAlertInfo(projectID string, fn func(data *AlertInfo)) (subscriber Subscriber, err error) {
 	return bus.conn.Subscribe(alertTopic(projectID), func(msg *nats.Msg) {
 		var data AlertInfo
 		err := json.Unmarshal(msg.Data, &data)
@@ -104,12 +104,12 @@ func (bus *NatsBus) SubscribeAlertInfo(projectID string, fn func(topic string, d
 			slog.Error("unmarshal alert info data error", "err", err)
 			return
 		}
-		fn(msg.Subject, &data)
+		fn(&data)
 	})
 }
 
 // SubscribeDeviceAlertInfo 订阅设备告警信息
-func (bus *NatsBus) SubscribeDeviceAlertInfo(projectID, deviceID string, fn func(topic string, data *AlertInfo)) (subscriber Subscriber, err error) {
+func (bus *NatsBus) SubscribeDeviceAlertInfo(projectID, deviceID string, fn func(data *AlertInfo)) (subscriber Subscriber, err error) {
 	return bus.conn.Subscribe(deviceAlertTopic(projectID, deviceID), func(msg *nats.Msg) {
 		var data AlertInfo
 		err := json.Unmarshal(msg.Data, &data)
@@ -117,7 +117,7 @@ func (bus *NatsBus) SubscribeDeviceAlertInfo(projectID, deviceID string, fn func
 			slog.Error("unmarshal alert info data error", "err", err)
 			return
 		}
-		fn(msg.Subject, &data)
+		fn(&data)
 	})
 }
 

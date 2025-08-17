@@ -5,8 +5,18 @@ import (
 	"fmt"
 	"net/http"
 	"resty.dev/v3"
+	"sync"
 	"time"
 )
+
+type Client struct {
+	AppID       string
+	AppSecret   string
+	AccessToken string
+	ExpiresAt   time.Time
+	cli         *resty.Client
+	tokenMutex  sync.Mutex // 保护令牌访问的互斥锁
+}
 
 type Response[T any] struct {
 	Status int    `json:"status,omitempty"` // http 状态码
@@ -22,10 +32,16 @@ func (resp *Response[T]) Error() string {
 	return fmt.Sprintf("%s: %s", resp.Code, resp.Msg)
 }
 
-var cli *resty.Client
+var client *Client
 
 func SendRequest[T any](method, url string, reqData any, respData *Response[T]) error {
-	resp, err := cli.R().
+	err := client.getAccessToken()
+	if err != nil {
+		return err
+	}
+
+	resp, err := client.cli.R().
+		SetHeader("Authorization", "Bearer "+client.AccessToken).
 		SetBody(reqData).
 		SetResult(respData).
 		SetError(respData).
@@ -85,12 +101,14 @@ func WithTimeout(timeout time.Duration) Option {
 	}
 }
 
-func Init(baseUrl, apiKey, projectID string, opts ...Option) *resty.Client {
-	cli = resty.New()
+// InitClient API 密钥认证
+// baseUrl 基础 URL
+// appID 应用ID
+// appSecret 应用密钥
+func InitClient(baseUrl, appID, appSecret string, opts ...Option) *Client {
+	cli := resty.New()
 	cli.SetTimeout(20 * time.Second)
 	cli.SetBaseURL(baseUrl)
-	cli.SetHeader("X-API-Key", apiKey)
-	cli.SetHeader("X-ProjectID", projectID)
 	cli.SetTransport(&http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	})
@@ -98,27 +116,6 @@ func Init(baseUrl, apiKey, projectID string, opts ...Option) *resty.Client {
 	for _, opt := range opts {
 		opt(cli)
 	}
-	return cli
-}
-
-// InitClient API 密钥认证
-// baseUrl 基础 URL
-// appKey 应用ID
-// appSecret 应用密钥
-func InitClient(baseUrl, appKey, appSecret string, opts ...Option) *resty.Client {
-	cli = resty.New()
-	cli.SetTimeout(20 * time.Second)
-	cli.SetBaseURL(baseUrl)
-	cli.SetTransport(&HMACRoundTripper{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		},
-		AppKey:    appKey,
-		AppSecret: appSecret,
-	})
-	// 应用 Option
-	for _, opt := range opts {
-		opt(cli)
-	}
-	return cli
+	client = &Client{cli: cli, AppID: appID, AppSecret: appSecret}
+	return client
 }

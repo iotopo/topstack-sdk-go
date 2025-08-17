@@ -35,10 +35,7 @@ import (
 )
 
 func main() {
-	apiKey := "your-api-key"
-	projectID := "iotopo"
-	//cli := client.Init("https://your-topstack-instance.com", apiKey, projectID)
-    cli := client.InitClient("https://your-topstack-instance.com", appKey, appSecret)
+    cli := client.InitClient("https://your-topstack-instance.com", appID, appSecret)
 	cli.SetDebug(true)
     // ...
 }

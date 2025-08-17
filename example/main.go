@@ -13,10 +13,15 @@ import (
 )
 
 func main() {
-	apiKey := "8mphozy98fkor6iu"
-	projectID := "iotopo"
+	//apiKey := "8mphozy98fkor6iu"
+	//projectID := "iotopo"
+	//client.Init("http://localhost:8000", apiKey, projectID, client.WithDebug(true))
 
-	client.Init("http://localhost:8000", apiKey, projectID, client.WithDebug(true))
+	//appID := "ba4c3c7be64a44fba37c1cfaae0abb61"
+	//appSecret := "ba4c3c7be64a44fba37c1cfaae0abb61"
+	appID := "d55864f766c34d0383243eaacd8e01f7"
+	appSecret := "34bc004307e8458fae7beb1d9197e759"
+	client.InitClient("http://localhost:8000", appID, appSecret, client.WithDebug(true))
 
 	{
 		resp, err := alertlevel.Query()
@@ -28,7 +33,7 @@ func main() {
 
 	// 查询单测点实时值
 	{
-		resp, err := iot.FindLast(iot.FindLastRequest{DeviceID: "dev1", PointID: "v1"})
+		resp, err := iot.FindLast(iot.FindLastRequest{DeviceID: "Dev1", PointID: "V1"})
 		if err != nil {
 			panic(err)
 		}
@@ -37,7 +42,7 @@ func main() {
 
 	// 批量查询多测点实时值
 	{
-		_, err := iot.FindLastBatch(iot.FindLastBatchRequest{{DeviceID: "dev1", PointID: "v1"}})
+		_, err := iot.FindLastBatch(iot.FindLastBatchRequest{{DeviceID: "Dev1", PointID: "V1"}})
 		if err != nil {
 			panic(err)
 		}
@@ -45,7 +50,7 @@ func main() {
 
 	// 控制指令下发
 	{
-		_, err := iot.SetValue(iot.SetValueRequest{DeviceID: "dev1", PointID: "V4", Value: "2"})
+		_, err := iot.SetValue(iot.SetValueRequest{DeviceID: "Dev1", PointID: "V4", Value: "2"})
 		if err != nil {
 			panic(err)
 		}
@@ -97,8 +102,8 @@ func main() {
 
 	{
 		resp, err := device_type_group.Create(device_type_group.CreateRequest{
-			Name: "测试分组",
-			Code: "test-group",
+			Name:        "测试分组",
+			Code:        "test-group",
 			Description: "SDK创建测试",
 		})
 		if err != nil {
@@ -109,9 +114,9 @@ func main() {
 
 	{
 		resp, err := device_type_group.Modify(device_type_group.ModifyRequest{
-			ID:   "group-id",
-			Name: "新分组名",
-			Code: "new-code",
+			ID:          "group-id",
+			Name:        "新分组名",
+			Code:        "new-code",
 			Description: "修改描述",
 		})
 		if err != nil {
@@ -131,12 +136,12 @@ func main() {
 	// device_type 示例
 	{
 		resp, err := devicetype.Create(devicetype.CreateRequest{
-			Name: "测试类型",
+			Name:        "测试类型",
 			Description: "SDK创建测试类型",
-			Asset: true,
-			Perf: false,
-			Code: "test-type",
-			Icon: "icon-test",
+			Asset:       true,
+			Perf:        false,
+			Code:        "test-type",
+			Icon:        "icon-test",
 		})
 		if err != nil {
 			panic(err)
@@ -146,13 +151,13 @@ func main() {
 
 	{
 		resp, err := devicetype.Modify(devicetype.ModifyRequest{
-			ID:   "type-id",
-			Name: "新类型名",
+			ID:          "type-id",
+			Name:        "新类型名",
 			Description: "修改描述",
-			Asset: false,
-			Perf: true,
-			Code: nil,
-			Icon: "icon-new",
+			Asset:       false,
+			Perf:        true,
+			Code:        nil,
+			Icon:        "icon-new",
 		})
 		if err != nil {
 			panic(err)
@@ -228,8 +233,8 @@ func main() {
 	// device 示例
 	{
 		resp, err := device.Create(device.CreateRequest{
-			Name: "测试设备",
-			TypeID: "type-id",
+			Name:        "测试设备",
+			TypeID:      "type-id",
 			Description: "SDK创建测试设备",
 			ConnectMode: "direct",
 		})
@@ -241,8 +246,8 @@ func main() {
 
 	{
 		resp, err := device.Modify(device.ModifyRequest{
-			ID:   "device-id",
-			Name: "新设备名",
+			ID:          "device-id",
+			Name:        "新设备名",
 			Description: "修改描述",
 			ConnectMode: "gateway",
 		})
